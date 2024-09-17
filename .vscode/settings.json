@@ -1,0 +1,14 @@
+{
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "/mnt/c/Users/jaannigu/Desktop/ut/c-asm-24-template/lib",
+            "binaryPath": "/mnt/c/Users/jaannigu/Desktop/ut/c-asm-24-template/lib/main",
+            "binaryArgs": []
+        },
+        {
+            "cwd": "/home/jaan/c-asm-24-template/lib",
+            "binaryPath": "/home/jaan/c-asm-24-template/lib/main",
+            "binaryArgs": []
+        }
+    ]
+}
