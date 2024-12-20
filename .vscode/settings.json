@@ -9,6 +9,15 @@
             "cwd": "/home/jaan/c-asm-24-template/lib",
             "binaryPath": "/home/jaan/c-asm-24-template/lib/main",
             "binaryArgs": []
+        },
+        {
+            "cwd": "/home/jaan/c-asm-24/lib",
+            "binaryPath": "/home/jaan/c-asm-24/lib/main",
+            "binaryArgs": []
         }
-    ]
+    ],
+    "files.associations": {
+        "stdlib.h": "c",
+        "instructions.h": "c"
+    }
 }

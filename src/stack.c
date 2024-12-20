@@ -1,39 +1,74 @@
 #include <stdio.h>
 #include "stack.h"
+#include <stdlib.h>
 /* Globaalse pinu massiivi pikkus. */
 #define stack_size 100
 
+
+/* Pinu struktuuri muutuja. */
+//struct stack_st stack = { .len = 0, .size = 0, .arr = NULL};
+//struct stack_st stack = EMPTY_STACK;
 /* Globaalse pinu pikkus, ehk mitu elementi on pinus. Antud muutuja väärtust
    on võimalik kasutada massiivist viimase elemendi leidmiseks, mis asub indeksil
    stack_len - 1, sest massiivi indekseerimine algiab 0-st ja esimene vaba koht,
    kui see eksisteerib asub indeksil stack_len.
 */
-int stack_len = 0;
 
 /* Globaalne pinu int väärtustest pikkusega stack_size. Olulised indeksid:
    stack[stack_len - 1]    - pinu pealmine element, kui stack_len > 0,
    stack[stack_len]        - massiivi esimene "vaba" koht, kui stack_len < stack_size
 */
-int stack[stack_size];
+// int stack[stack_size];
 
 /* Funktsioon push saab parameetriks int tüüpi väärtuse, mille lisab globaalsesse pinusse, kui
  * selles on veel ruumi. Vastasel korral trükib ekkraanile vea. Funktsioon ei tagasta midagi.
  */
 
-void stack_push(int element)
-{
-    /* Kontrollime kas pinus on veel ruumi, kui ei ole, siis trükime ekraanile veateate. */
-    if (stack_len >= stack_size)
-    {
-        printf("Viga: pinusse rohkem elemente ei mahu\n");
-        return;
+/* Funktsioon push saab parameetriks int tüüpi väärtuse, mille lisab globaalsesse pinusse, kui
+ * selles on veel ruumi. Vastasel korral trükib ekkraanile vea. Funktsioon ei tagasta midagi.
+ */
+void stack_push(struct stack_st *s, int element) {
+    /* Teeme topelt kontrolli, kuigi piisaks vaid ühest, kas mälu on allokeeritud. */
+    if (s->size == 0 || s->arr == NULL) {
+        /* Mälu pole allokeeritud. */
+
+
+        /* Alustame ühest elemendist. */
+        s->size = 1;
+
+        /* Allokeerime mälu vaid ühe (int tüüpi!!!) elemendi jaoks. */
+        s->arr = malloc(sizeof(int) * s->size);
+
+        /* Kontrollime kas mälu küsimine õnnestus. */
+        if (s->arr == NULL) {
+           printf("Mälu otsas!\n");
+           return;
+        }
+
+        /* Antud hetkel ei saa elemente pinus olla. */
+        s->len = 0;
+    } else if (s->len == s->size) {
+        /* Peame mälu suurendama 2x, aga kasutame ajutisi muutujaid, sest
+           mälu suuruse muutmine võib ebaõnnestuda. */
+        int tmp_size = s->size * 2;
+        int *tmp_arr = NULL;
+
+        tmp_arr = realloc(s->arr, tmp_size * sizeof(int));
+        if (tmp_arr == NULL) {
+            printf("Mäluala suuruse muutmine ebaõnnestus.\n");
+            return;
+        }
+        /* Alles nüüd teame, et kõik õnnestus! */
+
+        s->arr = tmp_arr;
+        s->size = tmp_size;
     }
 
     /* Antud hetkel teame, et pinusse mahub veel vähemalt üks element. */
-    stack[stack_len] = element;
+    s->arr[s->len] = element;
 
     /* Suurendame pinusse lisatud elementide arvu. */
-    stack_len++;
+    s->len++;
 
     return;
 }
@@ -41,20 +76,34 @@ void stack_push(int element)
 /* Funktsioon pop ei saa ühtegi parameetrit ja tagastab globaalse pinu pealmise elemendi, mille ta
  * pinust eemaldab. Kui pinu on juba tühi, siis funktsioon tagastab väärtuse 0.
  */
-int stack_pop(void)
+int stack_pop(struct stack_st *s)
 {
-    /* Kontrollime, kas pinus on elemente. Kui ei ole, siis tagastame väärtuse 0. */
-    if (stack_len == 0)
+    if (s->len == 0 || s->arr == 0)
     {
-        /* Pinu on tühi, tagastame väärtuse 0. */
         return 0;
     }
 
-    /* Teame, et pinus on vähemalt üks element. */
-    int element = stack[stack_len - 1];
+    int element = s->arr[s->len - 1];
 
-    /* Vähendame pinu elementide arvu. */
-    stack_len--;
+    s->len--;
+
+    if (s->len > 0 && s->len <= s->size / 2)
+    {
+        int tmp_size = s->size / 2;
+        int *tmp_arr = realloc(s->arr, tmp_size * sizeof(int));
+        if (tmp_arr == NULL) {
+            printf("Mäluala suuruse vähendamine ebaõnnestus.\n");
+            return element; 
+        }
+        s->arr = tmp_arr;
+        s->size = tmp_size;
+    }
+    else if (s->len == 0)
+    {
+        free(s->arr);
+        s->arr = NULL;
+        s->size = 0;
+    }
 
     /* Tagastame eemaldatud väärtuse. */
     return element;
@@ -63,54 +112,31 @@ int stack_pop(void)
 /* Funktsioon isEmpty tagastab tõeväärtuse (0-vale ja mitte 0 tõene) vastavalt sellele kas
  * pinu on tühi või mitte.
  */
-int stack_isEmpty(void)
+int stack_isEmpty(struct stack_st *s)
 {
-    return !(stack_len > 0);
+    return !(s->len > 0);
 }
 /* Funktsioon peek tagastab pinu pealmise elemendi ilma seda eemaldamata.
  * Kui pinu on tühi, siis see tagastab 0 väärtuse.
  */
-int stack_peek(void)
+int stack_peek(struct stack_st *s)
 {
-    if (!stack_isEmpty())
+    if (!stack_isEmpty(s))
     {
-        return stack[stack_len - 1];
+        return s->arr[s->len - 1];
     }
     return 0;
 }
 
 /* Funktsioon print_stack trükib ekraanile kõik pinu elemendid eraldi reale alustades ülemisest.
  */
-void stack_print(void)
+void stack_print(struct stack_st *s)
 {
     printf("Stack:\n");
-    for (int i = stack_len - 1; i >= 0; i--)
+    for (int i = s->len - 1; i >= 0; i--)
     {
-        printf("%d\n", stack[i]);
+        printf("%d\n", s->arr[i]);
     }
 
     return;
-}
-int main()
-{
-    /* Lisame pinusse väärtused 10, 8 ja -40 testimiseks. */
-    stack_push(10);
-    stack_push(8);
-    stack_push(-40);
-
-    /* Lihtsalt eemaldame pealmise väärtuse (-40) ja ei salvesta seda muutujasse. */
-    stack_pop();
-
-    /* Eemaldame pealmise väärtuse ja salvestame selle muutujasse, et saaksime seda ekraanil kuvada. */
-    int a = stack_pop();
-    printf("%d\n", a);
-
-    /* Eemaldame veel ühe elemendi ja trükime selle välja sealjuures kasutades juba eelnevalt defineeritud muutujat a. */
-    a = stack_pop();
-    printf("%d\n", a);
-    stack_push(1);
-    int b = stack_peek();
-    printf("%d\n", b);
-    stack_print();
-    return 0;
 }
