@@ -9,7 +9,7 @@ struct BF_instruction_st {
     /* Assembleri implementatsiooni funktsioon. Trükib välja vastava instruktsiooni
        implementatsiooni assembleris. */
     void (*printAsm)(struct BF_instruction_st *instruction, int *index);
-
+    void (*free)(struct BF_instruction_st *p);
     /* Implementatsiooni spetsiifilised väärtused. */
     union {
         /* Suurenda liitmisel väärtust selle võrra (võib olla ka negatiivne). */
@@ -27,7 +27,7 @@ struct BF_instruction_st {
 };
 struct BF_instruction_st *BF_increment_new(int increment);
 struct BF_instruction_st *BF_beginLoop_new(void);
-struct BF_instruction_st *BF_endLoop_new(void);
+struct BF_instruction_st *BF_endLoop_new(int beginIndex);
 struct BF_instruction_st *BF_move_new(int positions);
 struct BF_instruction_st *BF_print_new(void);
 struct BF_instruction_st *BF_read_new(void);
@@ -39,5 +39,13 @@ void BF_endLoop_run(struct BF_instruction_st *instruction, int *index);
 void BF_print_run(struct BF_instruction_st *instruction, int *index);
 void BF_read_run(struct BF_instruction_st *instruction, int *index);
 void BF_move_run(struct BF_instruction_st *instruction, int *index);
+void BF_instruction_free(struct BF_instruction_st *instruction);
+
+void BF_increment_printAsm(struct BF_instruction_st *instruction, int *index);
+void BF_beginLoop_printAsm(struct BF_instruction_st *instruction, int *index);
 void BF_endLoop_printAsm(struct BF_instruction_st *instruction, int *index);
+void BF_move_printAsm(struct BF_instruction_st *instruction, int *index);
+void BF_print_printAsm(struct BF_instruction_st *instruction, int *index);
+void BF_read_printAsm(struct BF_instruction_st *instruction, int *index);
+
 #endif

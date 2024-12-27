@@ -196,7 +196,35 @@ void run(struct BF_instruction_st **inst_arr, int inst_arr_len) {
     }
 }
 
+void printAsm(struct BF_instruction_st **inst_arr, int inst_arr_len) {
 
+    printf(
+        "global main\n"
+        "extern mem_add\n"
+        "extern mem_move\n"
+        "extern mem_inc\n"
+        "extern mem_dec\n"
+        "extern mem_left\n"
+        "extern mem_right\n"
+        "extern mem_get\n"
+        "extern mem_set\n"
+        "extern mem_printDebug\n\n"
+        "extern putchar\n\n");
+
+    printf("section .text\n");
+    printf("main:\n");
+
+    /* Käime läbi kõik instruktsioonid ja käivitame neil
+       funktsiooni printAsm. */
+    for (int i = 0; i < inst_arr_len; i++) {
+       if (inst_arr[i] != NULL) {
+           inst_arr[i]->printAsm(inst_arr[i], &i);
+       }
+    }
+
+    /* Funktsiooni main lõpp. */
+    printf("    ret\n");
+}
 void interpret2(char *program) {
     /* Leiame programmi lähtekoodi pikkuse. */
     int program_len = strlen(program);
@@ -209,12 +237,10 @@ void interpret2(char *program) {
     parse(inst_arr, program);
     /* Käivitame programmi. */
     run(inst_arr, program_len);
-
+    printAsm(inst_arr,program_len);
     /** TODO! Mälu vajab vabastamist! **/
     for (int i = 0; i < program_len; i++) {
-        if (inst_arr[i] != NULL) {
             free(inst_arr[i]);  // Vabastame iga instruksiooni jaoks eraldatud mälu
-        }
     }
     free(inst_arr);
 }

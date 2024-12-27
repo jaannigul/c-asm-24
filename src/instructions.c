@@ -23,6 +23,7 @@ struct BF_instruction_st *BF_increment_new(int increment) {
 
     /* Väärtustame inkremendi. */
     new->increment = increment;
+    new->printAsm = BF_increment_printAsm;
     new->run = BF_increment_run;
 cleanup:
     return new;
@@ -76,6 +77,7 @@ struct BF_instruction_st *BF_beginLoop_new(void) {
     /* Hetkel pole teada kus asub tsükli lõpp, seega kasutame väärtust, mis
        ei saa korrektne olla.*/
     new->loopForwardIndex = -1;
+    new->printAsm = BF_beginLoop_printAsm;
     new->run = BF_beginLoop_run;
 cleanup:
     return new;
@@ -104,7 +106,7 @@ void BF_endLoop_run(struct BF_instruction_st *instruction, int *index) {
    NB! Oluline on märkida, et loopForwardIndex ei saa algväärtustatud
    sisulise väärtusega ja seda on vaja muuta hiljem! 
 */
-struct BF_instruction_st *BF_endLoop_new(void) {
+struct BF_instruction_st *BF_endLoop_new(int loopBackIndex) {
     struct BF_instruction_st *new = NULL;
 
     new = malloc(sizeof(struct BF_instruction_st));
@@ -113,15 +115,12 @@ struct BF_instruction_st *BF_endLoop_new(void) {
         goto cleanup;
     }
 
-    /* Hetkel pole teada kus asub tsükli lõpp, seega kasutame väärtust, mis
-       ei saa korrektne olla.*/
-    new->loopBackIndex = -1;
-    new->run = BF_endLoop_run;
+    new->loopBackIndex = loopBackIndex;
     new->printAsm = BF_endLoop_printAsm;
+    new->run = BF_endLoop_run;
 cleanup:
     return new;
 }
-
 
 void BF_print_run(struct BF_instruction_st *instruction, int *index) {
     char c = mem_get();  
@@ -159,6 +158,7 @@ struct BF_instruction_st *BF_move_new(int positions) {
         return NULL;
     }
     new->numberOfPositions = positions;
+    new->printAsm = BF_move_printAsm;
     new->run = BF_move_run;  
     return new;
 }
@@ -169,6 +169,7 @@ struct BF_instruction_st *BF_print_new(void) {
         printf("Mälu küsimine ebaõnnestus.");
         return NULL;
     }
+    new->printAsm = BF_print_printAsm;
     new->run = BF_print_run;
     return new;
 }
@@ -179,12 +180,80 @@ struct BF_instruction_st *BF_read_new(void) {
         printf("Mälu küsimine ebaõnnestus.");
         return NULL;
     }
+    new->printAsm = BF_read_printAsm;
     new->run = BF_read_run;  // Ensure this function exists for handling input
     return new;
 }
 
+// void BF_endLoop_printAsm(struct BF_instruction_st *instruction, int *index) {
+//     printf("    ;;;; Instruktsioon ]\n");
+//     printf("    jmp silt_%d\n", instruction->loopBackIndex);
+//     printf("silt_%d:\n", *index);
+// }
+
+
+
+
+void BF_instruction_free(struct BF_instruction_st *instruction) {
+    if (instruction == NULL) {
+        return;
+    }
+
+    free(instruction);
+}
+
+void BF_increment_printAsm(struct BF_instruction_st *instruction, int *index) {
+    if (instruction->increment > 0)
+    {
+    printf("    ;;;; Instruktsioon +\n");
+    
+    } else {
+        printf("    ;;;; Instruktsioon -\n");
+    }
+    
+    printf("    mov eax, %d\n", instruction->increment);
+    printf("    call mem_add\n");
+}
+
+void BF_beginLoop_printAsm(struct BF_instruction_st *instruction, int *index) {
+    printf("    ;;;; Instruktsioon [\n");
+    printf("silt_%d:\n", *index);
+    printf("    call mem_get\n");
+    printf("    cmp eax, 0\n");
+    printf("    je silt_%d\n", instruction->loopForwardIndex);
+}
+
 void BF_endLoop_printAsm(struct BF_instruction_st *instruction, int *index) {
     printf("    ;;;; Instruktsioon ]\n");
-    printf("    jmp silt_%d\n", instruction->loopBackIndex);
+    printf("    call mem_get\n");
+    printf("    cmp eax, 0\n");
+    printf("    jne silt_%d\n", instruction->loopBackIndex);
     printf("silt_%d:\n", *index);
+}
+
+void BF_move_printAsm(struct BF_instruction_st *instruction, int *index) {
+    if (instruction->numberOfPositions > 0) {
+        for (int i = 0; i < instruction->numberOfPositions; i++) {
+            printf("    ;;;; Instruktsioon >\n");
+            printf("    call mem_right\n");
+        }
+    } else {
+        for (int i = 0; i < -instruction->numberOfPositions; i++) {
+            printf("    ;;;; Instruktsioon <\n");
+            printf("    call mem_left\n");
+        }
+    }
+}
+
+void BF_print_printAsm(struct BF_instruction_st *instruction, int *index) {
+    printf("    ;;;; Instruktsioon .\n");
+    printf("    call mem_get\n");
+    printf("    movzx eax, al\n");
+    printf("    call putchar\n");
+}
+
+void BF_read_printAsm(struct BF_instruction_st *instruction, int *index) {
+    printf("    ;;;; Instruktsioon ,\n");
+    printf("    call getchar\n");
+    printf("    call mem_set\n");
 }
