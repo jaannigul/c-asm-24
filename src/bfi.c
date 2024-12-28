@@ -223,6 +223,7 @@ void printAsm(struct BF_instruction_st **inst_arr, int inst_arr_len) {
     }
 
     /* Funktsiooni main lõpp. */
+    printf("    xor eax, eax\n");
     printf("    ret\n");
 }
 void interpret2(char *program) {

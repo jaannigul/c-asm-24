@@ -123,8 +123,8 @@ cleanup:
 }
 
 void BF_print_run(struct BF_instruction_st *instruction, int *index) {
-    char c = mem_get();  
-    printf("%c\n", c);    
+    char c = mem_get();
+    printf("%c", c);    
     ++*index;            
 }
 

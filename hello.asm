@@ -330,7 +330,5 @@ silt_48:
     call mem_get
     movzx eax, al
     call putchar
-    call mem_printDebug
-
     xor eax, eax
     ret
