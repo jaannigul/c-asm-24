@@ -198,22 +198,19 @@ void run(struct BF_instruction_st **inst_arr, int inst_arr_len) {
 
 void printAsm(struct BF_instruction_st **inst_arr, int inst_arr_len) {
 
-    printf(
+     printf(
         "global main\n"
-        "extern mem_add\n"
-        "extern mem_move\n"
-        "extern mem_inc\n"
-        "extern mem_dec\n"
-        "extern mem_left\n"
-        "extern mem_right\n"
-        "extern mem_get\n"
-        "extern mem_set\n"
-        "extern mem_printDebug\n\n"
-        "extern putchar\n\n");
-
-    printf("section .text\n");
-    printf("main:\n");
-
+        "extern putchar\n"
+        "section .bss\n"
+        "mem    resb 30000\n"
+        "section .text\n"
+        "main:\n"
+        "    mov edi, mem\n"
+        "    xor eax, eax\n"
+        "    mov ecx, 30000\n"
+        "    rep stosb\n"
+        "    xor ebx, ebx\n"
+    );
     /* Käime läbi kõik instruktsioonid ja käivitame neil
        funktsiooni printAsm. */
     for (int i = 0; i < inst_arr_len; i++) {
@@ -237,7 +234,7 @@ void interpret2(char *program) {
     /* Parsime sisendprogrammi, mille tulemus salvestatakse inst_arr massiivi. */
     parse(inst_arr, program);
     /* Käivitame programmi. */
-    run(inst_arr, program_len);
+    //run(inst_arr, program_len);
     printAsm(inst_arr,program_len);
     /** TODO! Mälu vajab vabastamist! **/
     for (int i = 0; i < program_len; i++) {

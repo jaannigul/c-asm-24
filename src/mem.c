@@ -1,26 +1,24 @@
 #include <stdio.h>
+#include <string.h>
 #include "mem.h"
 #define MEM_SIZE 30000
 static int i = 0; // indeks
-static char mem[MEM_SIZE] = {0};
+static unsigned char mem[MEM_SIZE] = {0};
 // suurendab indeksiga viidatud massiivi elemendi väärtust ühe võrra. Tagastab uue väärtuse.
 int mem_add(int amount){
-    mem[i] += amount;
+     mem[i] = (unsigned char)((mem[i] + amount) & 0xFF);
     return mem[i];
 }
-int mem_move(int numberOfPositions){
-    i += numberOfPositions;
-    if (0 > i) i = 0;
-    else if (MEM_SIZE < i) i = MEM_SIZE - 1;
+int mem_move(int numberOfPositions) {
+    i = (i + numberOfPositions) % MEM_SIZE;
+    if (i < 0) {
+        i += MEM_SIZE;
+    }
     return i;
 }
 void mem_init(){
-    for (size_t ix = 0; ix < MEM_SIZE; ix++)
-    {
-        mem[ix] = 0;
-    }
+    memset(mem, 0, sizeof(mem));
     i = 0;
-    
 }
 int mem_inc() {
     return mem_add(1);

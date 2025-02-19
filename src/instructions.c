@@ -124,13 +124,13 @@ cleanup:
 
 void BF_print_run(struct BF_instruction_st *instruction, int *index) {
     char c = mem_get();
-    printf("%c", c);    
+    printf("%c",(unsigned char)c);    
     ++*index;            
 }
 
 // , char input
 void BF_read_run(struct BF_instruction_st *instruction, int *index) {
-    printf("read run\n");
+    //printf("read run\n");
     int c = getc(stdin);
     if (c != EOF) {
         mem_set((char)c);
@@ -203,57 +203,62 @@ void BF_instruction_free(struct BF_instruction_st *instruction) {
 }
 
 void BF_increment_printAsm(struct BF_instruction_st *instruction, int *index) {
-    if (instruction->increment > 0)
-    {
-    printf("    ;;;; Instruktsioon +\n");
-    
+    if (instruction->increment > 0) {
+        printf("    ;;;; Instruktsioon +\n");
     } else {
         printf("    ;;;; Instruktsioon -\n");
     }
-    
-    printf("    mov eax, %d\n", instruction->increment);
-    printf("    call mem_add\n");
+    printf("    mov al, %d\n", instruction->increment);
+    printf("    add [mem+ebx], al\n");
 }
 
 void BF_beginLoop_printAsm(struct BF_instruction_st *instruction, int *index) {
     printf("    ;;;; Instruktsioon [\n");
     printf("silt_%d:\n", *index);
-    printf("    call mem_get\n");
+    printf("    movzx eax, byte [mem+ebx]\n");
     printf("    cmp eax, 0\n");
     printf("    je silt_%d\n", instruction->loopForwardIndex);
 }
 
+
 void BF_endLoop_printAsm(struct BF_instruction_st *instruction, int *index) {
     printf("    ;;;; Instruktsioon ]\n");
-    printf("    call mem_get\n");
+    printf("    movzx eax, byte [mem+ebx]\n");
     printf("    cmp eax, 0\n");
     printf("    jne silt_%d\n", instruction->loopBackIndex);
     printf("silt_%d:\n", *index);
 }
 
+
+
 void BF_move_printAsm(struct BF_instruction_st *instruction, int *index) {
-    if (instruction->numberOfPositions > 0) {
-        for (int i = 0; i < instruction->numberOfPositions; i++) {
+    int steps = instruction->numberOfPositions;
+    if (steps > 0) {
+        for (int j = 0; j < steps; j++) {
             printf("    ;;;; Instruktsioon >\n");
-            printf("    call mem_right\n");
+            printf("    inc ebx\n");
         }
     } else {
-        for (int i = 0; i < -instruction->numberOfPositions; i++) {
+        for (int j = 0; j < -steps; j++) {
             printf("    ;;;; Instruktsioon <\n");
-            printf("    call mem_left\n");
+            printf("    dec ebx\n");
         }
     }
 }
 
+
 void BF_print_printAsm(struct BF_instruction_st *instruction, int *index) {
     printf("    ;;;; Instruktsioon .\n");
-    printf("    call mem_get\n");
-    printf("    movzx eax, al\n");
+    printf("    movzx eax, byte [mem+ebx]\n");
+    printf("    and eax, 0xFF\n");
+    printf("    push eax\n");
     printf("    call putchar\n");
+    printf("    add esp, 4\n");
 }
+
 
 void BF_read_printAsm(struct BF_instruction_st *instruction, int *index) {
     printf("    ;;;; Instruktsioon ,\n");
     printf("    call getchar\n");
-    printf("    call mem_set\n");
+    printf("    mov [mem+ebx], al\n");
 }

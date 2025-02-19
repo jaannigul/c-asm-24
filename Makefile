@@ -1,8 +1,8 @@
 # Define compiler and flags
 CC := gcc
 ASM := nasm
-CFLAGS := -m32 -std=c11 -g -Og -Werror -Wall -Wpedantic -DDEBUG
-ASMFLAGS := -felf
+CFLAGS := -m32 -std=c11 -g -Og -Werror -Wall -Wpedantic -DDEBUG -no-pie
+ASMFLAGS := -felf32
 # Executable names
 EXE := lib/main
 BFI_EXE := bfi
